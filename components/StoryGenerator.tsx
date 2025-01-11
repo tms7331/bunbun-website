@@ -3,42 +3,47 @@
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-// import { generateStory } from '../actions'
+import { OpenAI } from 'openai';
+const chatgptKey = process.env.NEXT_PUBLIC_CHATGPT_KEY;
+const openai = new OpenAI({ apiKey: chatgptKey, dangerouslyAllowBrowser: true });
 
-export async function generateStory(theme: string): Promise<string> {
-  // In a real application, you might call an AI service here
-  // For now, we'll return a predefined story based on the theme
-  const stories = {
-    adventure: [
-      "5-year-old BunBun hopped on a tiny hot air balloon and floated over fields of carrots, marveling at the world below.",
-      "BunBun, at the tender age of 5, discovered a secret tunnel that led to a magical forest full of talking vegetables.",
-    ],
-    friendship: [
-      "BunBun, now 5 years old, made a new friend today - a curious squirrel who shared his acorns and taught BunBun how to climb trees.",
-      "5-year-old BunBun organized a tea party for all the young animals in the garden, serving carrot cake and clover tea.",
-    ],
-    garden: [
-      "BunBun, at 5 years old, learned how to plant his own carrot seeds and watched with excitement as they grew into delicious treats.",
-      "The 5-year-old BunBun had an exciting adventure exploring a nearby vegetable garden, tasting new flavors and making plant friends.",
-    ],
-    default: [
-      "5-year-old BunBun spent the day hopping through fields of flowers, enjoying the sunshine and playing hide-and-seek with butterflies.",
-      "BunBun, now a playful 5-year-old, learned how to do a binky jump today, leaping and twisting in the air with joy!",
-    ]
+
+async function generateStory(theme: string) {
+  const defaultThemes = ["forest", "birthday", "Christmas", "party"];
+  if (!theme) {
+    theme = defaultThemes[Math.floor(Math.random() * defaultThemes.length)];
   }
-
-  const themeStories = stories[theme.toLowerCase() as keyof typeof stories] || stories.default
-  return themeStories[Math.floor(Math.random() * themeStories.length)]
+  const msg = "Generate a story for 5-year-old BunBun with the theme: " + theme;
+  const completion = await openai.chat.completions.create({
+    messages: [{
+      'role': 'system',
+      'content': "You are a storyteller for children, and will generate stories that are 2-3 paragraphs about BunBun, a 5 year old rabbit"
+    },
+    {
+      'role': 'user',
+      'content': msg,
+    },
+    ],
+    model: "gpt-3.5-turbo",
+  });
+  console.log(completion.choices[0]);
+  return completion.choices[0].message["content"];
 }
 
 
 export default function StoryGenerator() {
   const [story, setStory] = useState<string | null>(null)
   const [theme, setTheme] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleGenerateStory = async () => {
-    const generatedStory = await generateStory(theme)
-    setStory(generatedStory)
+    setIsLoading(true)
+    try {
+      const generatedStory = await generateStory(theme)
+      setStory(generatedStory)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -55,8 +60,12 @@ export default function StoryGenerator() {
           className="w-full"
         />
       </div>
-      <Button onClick={handleGenerateStory} className="w-full">
-        Generate BunBun Story
+      <Button
+        onClick={handleGenerateStory}
+        className="w-full"
+        disabled={isLoading}
+      >
+        {isLoading ? 'Generating...' : 'Generate BunBun Story'}
       </Button>
       {story && (
         <div className="p-4 bg-white bg-opacity-50 rounded-lg shadow">

@@ -6,11 +6,11 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 
 const images = [
-  { src: "/placeholder.svg", alt: "BunBun playing" },
-  { src: "/placeholder.svg", alt: "BunBun eating carrots" },
-  { src: "/placeholder.svg", alt: "BunBun napping" },
-  { src: "/placeholder.svg", alt: "BunBun in the garden" },
-  { src: "/placeholder.svg", alt: "BunBun with friends" },
+  { src: "/bunbun1.jpg", alt: "BunBun!" },
+  { src: "/bunbun2.jpg", alt: "BunBun!" },
+  { src: "/bunbun3.jpg", alt: "BunBun!" },
+  { src: "/bunbun4.jpg", alt: "BunBun!" },
+  { src: "/bunbun5.jpg", alt: "BunBun!" },
 ]
 
 export function NavigableGallery() {
